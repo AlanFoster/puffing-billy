@@ -14,20 +14,28 @@ module Billy
     end
 
     def handle_request(method, url, headers, body)
+      Billy.log(:info, "puffing-billy: REQUEST #{method} for '#{url}'")
+
       # Process the handlers by order of importance
       [:stubs, :cache, :proxy].each do |key|
         if (response = handlers[key].handle_request(method, url, headers, body))
+          Billy.log(:info, "puffing-billy: #{key} successfully handled #{method} for '#{url}'")
           return response
         end
+        Billy.log(:info, "puffing-billy: #{key} did not handle #{method} for '#{url}'")
       end
 
       body_msg = Billy.config.cache_request_body_methods.include?(method) ? " with body '#{body}'" : ''
+      Billy.log(:info, "puffing-billy: NOT HANDLED #{method} for '#{url}'")
       { error: "Connection to #{url}#{body_msg} not cached and new http connections are disabled" }
     end
 
     def handles_request?(method, url, headers, body)
       [:stubs, :cache, :proxy].each do |key|
-        return true if handlers[key].handles_request?(method, url, headers, body)
+        if handlers[key].handles_request?(method, url, headers, body)
+          Billy.log(:info, "puffing-billy: #{key} HANDLES #{method} for '#{url}'")
+          return true
+        end
       end
 
       false
