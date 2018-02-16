@@ -34,13 +34,13 @@ module Billy
       new_stub
     end
 
-    private
-
-    attr_writer :stubs
-
     def stubs
       @stubs ||= []
     end
+
+    private
+
+    attr_writer :stubs
 
     def find_stub(method, url)
       stubs.find { |stub| stub.matches?(method, url) }
