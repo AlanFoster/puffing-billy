@@ -15,11 +15,15 @@ module Billy
 
     def start(threaded = true)
       if threaded
-        Thread.new { main_loop }
+        @main_loop_thread = Thread.new { main_loop }
         sleep(0.01) while (not defined?(@signature)) || @signature.nil?
       else
         main_loop
       end
+    end
+
+    def stop
+      EM.stop
     end
 
     def url
